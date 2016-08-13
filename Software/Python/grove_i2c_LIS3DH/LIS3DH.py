@@ -96,13 +96,16 @@ class LIS3DH:
 
         # Assume we're using platform's default I2C bus if none is specified.
       if i2c is None:
+         print("is none")
          import I2C
          self.i2c = I2C
          # Require repeated start conditions for I2C register reads.  Unfortunately
          # the MPR121 is very sensitive and requires repeated starts to read all
          # the registers.
          I2C.require_repeated_start()
-      # Save a reference to the I2C device instance for later communication.
+      else:
+         self.i2c = i2c
+         # Save a reference to the I2C device instance for later communication.
       print(dir(self.i2c))
       self._device = self.i2c.get_i2c_device(address, **kwargs)
       print(dir(self._device))
