@@ -18,8 +18,15 @@ The GrovePi is compatible with the Raspberry Pi models A, A+, B, B+, 2, and 3.
 Getting started is easy. Check out our Getting Started With GrovePi Guide [here](http://www.dexterindustries.com/GrovePi/get-started-with-the-grovepi/). 
 We have an extensive library that covers most Grove sensors. You can find it on the Github repo.  You won’t need to hack much at all with our library: get started coding in Python and C now! 
 
+### Quick Install
+In order to quick install the `GrovePi` repository, open up a terminal and type the following command:
+```
+sudo curl -kL dexterindustries.com/update_grovepi | bash
+```
+The same command can be used for updating the `GrovePi` to the latest version.
+
 ### Want to use a sensor not in the library yet?  
-Ask us in the [forums](http://www.dexterindustries.com/forum/?forum=grovepi).  Want to use the GrovePi in a language not currently supported? [Ask and we will help](http://www.dexterindustries.com/forum/?forum=grovepi).
+Ask us in the [forums](http://forum.dexterindustries.com/c/grovepi).  Want to use the GrovePi in a language not currently supported? [Ask and we will help](http://forum.dexterindustries.com/c/grovepi).
 
 ### Programming the GrovePi
 The GrovePi can be programmed in Python, C, C#, Go, and NodeJS on the Raspberry Pi.  Simply start with one of our [example projects](http://www.dexterindustries.com/GrovePi/projects-for-the-raspberry-pi/) or [example code](https://github.com/DexterInd/GrovePi/tree/master/Software).  
@@ -41,7 +48,7 @@ See more at the [GrovePi Site](http://dexterindustries.com/GrovePi/)
 The MIT License (MIT)
 
 GrovePi for the Raspberry Pi: an open source platform for connecting Grove Sensors to the Raspberry Pi.
-Copyright (C) 2015  Dexter Industries
+Copyright (C) 2017  Dexter Industries
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

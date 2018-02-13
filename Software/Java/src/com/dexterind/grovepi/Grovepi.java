@@ -17,10 +17,10 @@ public final class Grovepi {
 
   public Board board;
   private final CopyOnWriteArrayList<GrovepiListener> listeners;
-  
+
   private Debug debug;
 
-  public Grovepi() {
+  public Grovepi() throws Exception {
     debug = new Debug("com.dexterind.gopigo.Grovepi");
     debug.log(Debug.FINEST, "Instancing a new GrovePi");
 
@@ -37,7 +37,12 @@ public final class Grovepi {
 
   public static Grovepi getInstance() {
     if(instance == null) {
-      instance = new Grovepi();
+      try {
+        instance = new Grovepi();
+      }
+      catch (Exception e) {
+        System.out.println("There was an error");
+      }
     }
     return instance;
   }
