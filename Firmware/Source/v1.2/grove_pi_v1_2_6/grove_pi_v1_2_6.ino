@@ -35,6 +35,9 @@ ChainableLED rgbled[6];   // 7 instances for D2-D8
 #define flow_en_cmd				18
 #define flow_dis_cmd       		13
 
+#define hires_analog_en_cmd      100
+#define hires_analog_dis_cmd     101
+
 #define tx433_control_cmd       100
 #define tx433_fill_buffer_cmd   101
 #define tx433_control_set_pin_subcmd        1
@@ -42,6 +45,8 @@ ChainableLED rgbled[6];   // 7 instances for D2-D8
 #define tx433_control_send_buffer_subcmd    3
 #define tx433_buffer_max_size   64
 
+int hires_analog_port = -1;
+int hires_value;
 int cmd[5];
 int index=0;
 int flag=0;
@@ -81,6 +86,15 @@ byte flow_val[3];        //Given it's own I2C buffer so that it does not corrupt
 char tx_msg_buffer[tx433_buffer_max_size]; // static buffer for message storage
 byte tx_msg_buffer_len = 0; // length of message to send
 byte tx_msg_buffer_idx = 0; // current position in buffer while filling it
+
+
+void hires_read_callback()
+{
+  int x = analogRead(hires_analog_port);
+  if (x > hires_value) {
+    hires_value = x;
+  }
+}
 
 void setup()
 {
@@ -123,10 +137,32 @@ void loop()
     else if(cmd[0]==2)
       digitalWrite(cmd[1],cmd[2]);
 
+    else if (cmd[0] ==  hires_analog_en_cmd ) {
+      hires_value = 0;
+      if (cmd[1] > 18) {
+	// trying to fool me?
+      }
+      else {
+	hires_analog_port = cmd[1];
+	Timer1.initialize(3000);
+	Timer1.attachInterrupt(hires_read_callback);
+      }
+    }
+    else if (cmd[0] ==  hires_analog_dis_cmd ) {
+      hires_analog_port = -1;
+      Timer1.detachInterrupt();
+    }
+
     //Analog Read
     else if(cmd[0]==3)
     {
-      aRead=analogRead(cmd[1]);
+      if (cmd[1] == hires_analog_port) {
+	aRead = hires_value;
+	hires_value = 0;
+      }
+      else {
+	aRead=analogRead(cmd[1]);
+      }
       b[1]=aRead/256;
       b[2]=aRead%256;
     }
