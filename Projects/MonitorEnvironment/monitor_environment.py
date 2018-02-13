@@ -47,8 +47,12 @@ from math import isnan
 atexit.register(grovepi.dust_sensor_dis)
 
 is_more_silent = 0
-loudness_sensor = 1
+loudness_sensor = 0
 # connect loudness senor to port A2
+
+grovepi.pinMode(loudness_sensor,"INPUT")
+
+threshhold = 140
 
 # connect dust sensor to port D2
 print("Reading from the dust sensor")
@@ -67,7 +71,7 @@ grovepi.pinMode(air_sensor,"INPUT")
 # Connect the Relais port to D4
 # SIG,NC,VCC,GND
 relais_port = 4
-grovepi.pinMode(relay,"OUTPUT")
+grovepi.pinMode(relais_port,"OUTPUT")
 
 ''' Add items one after the other '''
 
@@ -123,18 +127,18 @@ while True:
         loudness = 0;
         count = 0
         while count < 500:
-            val = grovepi.analogRead()[2]
+            val = grovepi.analogRead(loudness_sensor)[2]
             if (val > loudness):
-                val = loudness
+                loudness = val
 	    time.sleep(0.01)
             count += 1
         if loudness > threshhold:
-            grovepi.digitalWrite(relais, 1)
+            grovepi.digitalWrite(relais_port, 1)
             is_more_silent = 0
         else:
             is_more_silent += 1
             if is_more_silent > 2:
-                grovepi.digitalWrite(relais, 1)
+                grovepi.digitalWrite(relais_port, 1)
 
         if 1:
             ''' create DataContainer, providing data_type, zabbix server and port '''
