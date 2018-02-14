@@ -76,6 +76,10 @@ address = 0x04
 dRead_cmd = [1]
 # digitalWrite() command format header
 dWrite_cmd = [2]
+# set a port to hires max detection using timer polling
+fourDigitAnologHires_cmd = [100]
+# reset Hires:
+fourDigitAnologHiresReset_cmd = [101]
 # analogRead() command format header
 aRead_cmd = [3]
 # analogWrite() command format header
@@ -218,13 +222,22 @@ def pinMode(pin, mode):
 		write_i2c_block(address, pMode_cmd + [pin, 0, unused])
 	return 1
 
+# set analog pin to hires timer polling, analogRead will only return max value since last poll
+def setAnalogHires(pin):
+	write_i2c_block(address, fourDigitAnologHires_cmd + [pin, 1, unused])
+
+def reSetAnalogHires():
+	write_i2c_block(address, fourDigitAnologHiresReset_cmd + [0, 1, unused])
 
 # Read analog value from Pin
 def analogRead(pin):
 	write_i2c_block(address, aRead_cmd + [pin, unused, unused])
 	read_i2c_byte(address)
 	number = read_i2c_block(address)
-	return number[1] * 256 + number[2]
+        if type(number) == list:
+	        return number[1] * 256 + number[2]
+        else:
+                return number
 
 
 # Write PWM
