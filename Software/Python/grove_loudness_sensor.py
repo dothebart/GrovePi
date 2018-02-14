@@ -39,6 +39,8 @@ import grovepi
 # SIG,NC,VCC,GND
 loudness_sensor = 0
 
+grovepi.reSetAnalogHires()
+grovepi.setAnalogHires(loudness_sensor)
 while True:
     try:
         # Read the sound level
