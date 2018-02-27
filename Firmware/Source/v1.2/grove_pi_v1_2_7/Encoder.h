@@ -35,4 +35,4 @@ class Encoder
 };
 
 extern Encoder encoder;
-#endif;
+#endif

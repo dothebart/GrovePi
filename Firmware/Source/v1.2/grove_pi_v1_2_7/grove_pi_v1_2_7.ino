@@ -29,7 +29,9 @@ ChainableLED rgbled[6];   // 7 instances for D2-D8
 #define hires_analog_dis_cmd     101
 
 int hires_analog_port = -1;
-int hires_value;
+byte ringBufferPointer = 0;
+uint32_t hires_ringbuffer[10] = {0,0,0,0,0,0,0,0,0,0};
+
 int cmd[5];
 int index=0;
 int flag=0;
@@ -37,7 +39,7 @@ int i;
 byte val=0,b[21],float_array[4],dht_b[21];
 unsigned char dta[21];
 int length;
-int aRead=0;
+uint16_t aRead=0;
 byte accFlag=0,clkFlag=0;
 int8_t accv[3];
 byte rgb[] = { 0, 0, 0 };
@@ -65,28 +67,47 @@ int flow_run_bk=0;
 long flow_read_start;
 byte flow_val[3];        //Given it's own I2C buffer so that it does not corrupt the data from other sensors when running in background 
 
+uint16_t getAvg(){
+  uint32_t avg = 0;
+  for (byte i=0; i < (sizeof(hires_ringbuffer) / sizeof(uint32_t)); i++){
+    avg += hires_ringbuffer[i];
+  }
+  // we don't use SQRT, the last 4 bits are insignificant - sort of.
+  return (avg / (sizeof(hires_ringbuffer) / sizeof(uint32_t))) << 4;
+}
 
 void hires_read_callback()
 {
-  if ((hires_value < 0) || (hires_value >= 65535)) {
-    // recover from maxint: 
-    hires_value = 0;
+  static int ringPos = 0;
+
+  uint32_t analogVal = analogRead(hires_analog_port);
+  Serial.println("........");
+  Serial.println(ringPos);
+  Serial.println(analogVal);
+  if (ringPos == 0) {
+    Serial.println("xxxxxxx");
+    Serial.println(getAvg());
   }
-  int x = analogRead(hires_analog_port);
-  if (x > hires_value) {
-    hires_value = x;
+  // make square as rms matters
+  if (analogVal < 65000) { // if the value is bigger, this is broken. 
+    analogVal *= analogVal;
+    hires_ringbuffer[ringPos++] = analogVal;
+    ringPos %= (sizeof(hires_ringbuffer) / sizeof(uint32_t));
   }
 }
 
 void setup()
 {
-    // Serial.begin(38400);         // start serial for output
+    Serial.begin(38400);         // start serial for output
+    Serial.println("HI!");
     Wire.begin(SLAVE_ADDRESS);
 
     Wire.onReceive(receiveData);
     Wire.onRequest(sendData);
-	attachInterrupt(0,readPulseDust,CHANGE);
+    //attachInterrupt(0,readPulseDust,CHANGE);
 }
+
+
 int pin;
 int j;
 void loop()
@@ -104,13 +125,13 @@ void loop()
 		  digitalWrite(cmd[1],cmd[2]);
 
 		else if (cmd[0] ==  hires_analog_en_cmd ) {
-		  hires_value = 0;
 		  if (cmd[1] > 18) {
 			// trying to fool me?
 		  }
 		  else {
 			hires_analog_port = cmd[1];
-			Timer1.initialize(3000);
+			// scan every 0.1s
+			Timer1.initialize(100000);
 			Timer1.attachInterrupt(hires_read_callback);
 		  }
 		}
@@ -123,12 +144,14 @@ void loop()
 		else if(cmd[0]==3)
 		{
 		  if (cmd[1] == hires_analog_port) {
-		  	aRead = hires_value;
-		  	hires_value = 0;
+		    aRead = getAvg();
 		  }
 		  else {
 		  	aRead=analogRead(cmd[1]);
 		  }
+		  Serial.println("-------------------");
+		  Serial.println(aRead);
+
 		  b[1]=aRead/256;
 		  b[2]=aRead%256;
 		}
